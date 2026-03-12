@@ -18,11 +18,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AssetRipper.TextureDecoder" Version="2.2.1" />
-    <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
-    <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0023" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
-    <PackageReference Include="SkiaSharp" Version="2.88.9" />
+    <PackageReference Include="AssetRipper.TextureDecoder"
+                      Version="2.2.1" />
+    <PackageReference Include="SharpGLTF.Core"
+                      Version="1.0.0-alpha0023" />
+    <PackageReference Include="SharpGLTF.Toolkit"
+                      Version="1.0.0-alpha0023" />
+    <PackageReference Include="SixLabors.ImageSharp"
+                      Version="3.1.12" />
+    <PackageReference Include="SkiaSharp"
+                      Version="2.88.9" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,8 +41,12 @@
   <ItemGroup>
     <None Remove="Resources\Detex.dll" />
     <EmbeddedResource Include="Resources\Detex.dll" />
+    <None Remove="Resources\Detex.so" />
+    <EmbeddedResource Include="Resources\Detex.so" />
     <None Remove="Resources\tegra_swizzle_x64.dll" />
     <EmbeddedResource Include="Resources\tegra_swizzle_x64.dll" />
+    <None Remove="Resources\tegra_swizzle_x64.so" />
+    <EmbeddedResource Include="Resources\tegra_swizzle_x64.so" />
   </ItemGroup>
 
 </Project>

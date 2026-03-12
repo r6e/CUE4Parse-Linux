@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Serilog;
 
@@ -10,8 +11,11 @@ namespace CUE4Parse_Conversion.Textures.BC;
 
 public static class DetexHelper
 {
-    private const string MANIFEST_URL = "CUE4Parse_Conversion.Resources.Detex.dll";
-    public const string DLL_NAME = "Detex.dll";
+    private static readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    private static string ManifestResourceName => _isWindows
+        ? "CUE4Parse_Conversion.Resources.Detex.dll"
+        : "CUE4Parse_Conversion.Resources.Detex.so";
+    public static string DLL_NAME => _isWindows ? "Detex.dll" : "libDetex.so";
 
     private static Detex? Instance { get; set; }
 
@@ -35,13 +39,19 @@ public static class DetexHelper
     }
 
     /// <summary>
+    /// Returns the default absolute path where the Detex library will be extracted.
+    /// </summary>
+    public static string DefaultLibraryPath => Path.Combine(AppContext.BaseDirectory, DLL_NAME);
+
+    /// <summary>
     /// Load the Detex library DLL.
     /// </summary>
     public static bool LoadDll(string? path = null)
     {
-        if (File.Exists(path ?? DLL_NAME))
+        var resolvedPath = path ?? DefaultLibraryPath;
+        if (File.Exists(resolvedPath))
             return true;
-        return LoadDllAsync(path).GetAwaiter().GetResult();
+        return LoadDllAsync(resolvedPath).GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -62,35 +72,35 @@ public static class DetexHelper
     }
 
     /// <summary>
-    /// Asynchronously loads the Detex DLL from resources.
+    /// Asynchronously loads the Detex library from embedded resources.
     /// </summary>
     public static async Task<bool> LoadDllAsync(string? path)
     {
         try
         {
-            var dllPath = path ?? DLL_NAME;
+            var dllPath = path ?? DefaultLibraryPath;
 
             if (File.Exists(dllPath))
             {
-                Log.Information($"Detex DLL already exists at \"{dllPath}\".");
+                Log.Information($"Detex library already exists at \"{dllPath}\".");
                 return true;
             }
 
-            await using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(MANIFEST_URL);
+            await using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ManifestResourceName);
             if (stream == null)
             {
-                throw new MissingManifestResourceException("Couldn't find Detex.dll in Embedded Resources.");
+                throw new MissingManifestResourceException($"Couldn't find {ManifestResourceName} in Embedded Resources.");
             }
 
             await using var dllFs = File.Create(dllPath);
             await stream.CopyToAsync(dllFs).ConfigureAwait(false);
 
-            Log.Information($"Successfully loaded Detex DLL from embedded resources to \"{dllPath}\"");
+            Log.Information($"Successfully extracted Detex library from embedded resources to \"{dllPath}\"");
             return true;
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "Uncaught exception while loading Detex DLL");
+            Log.Warning(ex, "Uncaught exception while loading Detex library");
             return false;
         }
     }
